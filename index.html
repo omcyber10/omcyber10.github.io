@@ -1618,11 +1618,77 @@ footer {
       </div>
 
       <div class="about-photo-wrap fade-in">
-        <div class="photo-circle">
-          <i class="fa fa-shield-halved photo-icon"></i>
-          <div class="photo-ring-label">Cybersecurity Analyst</div>
+        <div class="id-badge">
+          <div class="id-clip"></div>
+          <div class="id-head">
+            <span class="id-org">OM-SEC // OPERATIVE ID</span>
+            <span class="id-led"></span>
+          </div>
+          <div class="id-avatar">
+            <i class="fa fa-user-secret"></i>
+            <div class="id-scanline"></div>
+          </div>
+          <div class="id-name">OM PATEL</div>
+          <div class="id-role">CYBERSECURITY ANALYST</div>
+          <div class="id-rows">
+            <div><span>UNIT</span><b>SOC / DFIR</b></div>
+            <div><span>BASE</span><b>CANADA</b></div>
+            <div><span>CLEARANCE</span><b class="id-grn">LEVEL 5</b></div>
+            <div><span>STATUS</span><b class="id-grn">ACTIVE — DEPLOYABLE</b></div>
+          </div>
+          <div class="id-barcode">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+            ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="id-serial">ID: 0M-P4T3L-2026 · ISSUED BY: THE SOC</div>
         </div>
       </div>
+
+      <style>
+      .id-badge {
+        width: 290px; padding: 22px 22px 18px; position: relative;
+        background: linear-gradient(160deg, rgba(13,31,60,.95), rgba(8,18,36,.95));
+        border: 1px solid rgba(0,212,255,.3); border-radius: 16px;
+        font-family: var(--font-mono); text-align: center;
+        box-shadow: 0 0 0 6px rgba(42,111,188,.06), 0 24px 60px rgba(0,0,0,.45), 0 0 40px rgba(0,212,255,.08);
+        transform: rotate(2deg); transition: transform .4s ease, box-shadow .4s ease;
+      }
+      .id-badge:hover { transform: rotate(0deg) translateY(-4px); box-shadow: 0 0 0 6px rgba(0,212,255,.08), 0 30px 70px rgba(0,0,0,.5), 0 0 60px rgba(0,212,255,.16); }
+      .id-clip {
+        position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+        width: 52px; height: 14px; border-radius: 7px;
+        background: rgba(0,0,0,.5); border: 1px solid rgba(0,212,255,.35);
+      }
+      .id-head { display: flex; justify-content: space-between; align-items: center; margin: 4px 0 16px; }
+      .id-org { font-size: .58rem; letter-spacing: .18em; color: var(--cyan); }
+      .id-led { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse-green 2s infinite; }
+      .id-avatar {
+        width: 110px; height: 110px; margin: 0 auto 14px; position: relative; overflow: hidden;
+        border-radius: 12px; background: rgba(0,0,0,.35); border: 1px solid rgba(0,212,255,.25);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 3.2rem; color: var(--blue-bright);
+      }
+      .id-scanline {
+        position: absolute; left: 0; right: 0; height: 2px;
+        background: rgba(0,255,136,.7); box-shadow: 0 0 12px rgba(0,255,136,.8);
+        animation: idScan 2.6s ease-in-out infinite;
+      }
+      @keyframes idScan { 0%,100% { top: 8%; } 50% { top: 88%; } }
+      .id-name { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: .14em; }
+      .id-role { font-size: .6rem; letter-spacing: .26em; color: var(--cyan); margin: 4px 0 14px; }
+      .id-rows { text-align: left; border-top: 1px dashed rgba(255,255,255,.12); padding-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+      .id-rows div { display: flex; justify-content: space-between; font-size: .62rem; }
+      .id-rows span { color: var(--grey-400); letter-spacing: .1em; }
+      .id-rows b { color: var(--grey-100); font-weight: 500; letter-spacing: .06em; }
+      .id-rows .id-grn { color: var(--green); }
+      .id-barcode { display: flex; justify-content: center; gap: 2px; margin: 16px 0 8px; height: 26px; align-items: stretch; }
+      .id-barcode i { width: 2px; background: rgba(215,231,255,.75); }
+      .id-barcode i:nth-child(3n)  { width: 4px; }
+      .id-barcode i:nth-child(4n)  { opacity: .45; }
+      .id-barcode i:nth-child(5n)  { width: 1px; }
+      .id-barcode i:nth-child(7n)  { width: 5px; opacity: .85; }
+      .id-serial { font-size: .54rem; letter-spacing: .14em; color: var(--grey-400); }
+      </style>
     </div>
   </div>
 </section>
