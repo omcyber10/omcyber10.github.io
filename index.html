@@ -3803,5 +3803,163 @@ if (matchMedia('(pointer: coarse)').matches && window.DeviceOrientationEvent) {
   });
 }
 </script>
+
+<!-- ═══════════════════════════════════════════════════════
+     🏆 AWARD LAYER — scroll physics, marquees, word reveals,
+        film grain, hero cinematics, living favicon
+═══════════════════════════════════════════════════════ -->
+<style>
+/* ── film grain over everything ── */
+#grain {
+  position: fixed; inset: -100px; z-index: 9998; pointer-events: none;
+  opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grainShift .4s steps(4) infinite;
+}
+@keyframes grainShift {
+  0%   { transform: translate(0,0); }
+  25%  { transform: translate(-30px,18px); }
+  50%  { transform: translate(22px,-26px); }
+  75%  { transform: translate(-14px,-12px); }
+  100% { transform: translate(0,0); }
+}
+
+/* ── velocity skew applied per-section ── */
+section { will-change: transform; }
+
+/* ── cinematic marquee bands ── */
+.marquee-band {
+  overflow: hidden; white-space: nowrap; padding: 26px 0;
+  border-top: 1px solid rgba(42,111,188,.18);
+  border-bottom: 1px solid rgba(42,111,188,.18);
+  background: rgba(5,12,24,.5);
+  user-select: none; position: relative;
+}
+.marquee-band .mq-track {
+  display: inline-flex; gap: 0; will-change: transform;
+}
+.marquee-band span {
+  font-family: var(--font-sans); font-weight: 900;
+  font-size: clamp(2.2rem, 5.5vw, 4.2rem); letter-spacing: .02em;
+  padding-right: 3.5rem; line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(42,111,188,.5);
+  transition: color .3s;
+}
+.marquee-band span b { font-weight: 900; color: rgba(0,212,255,.18); -webkit-text-stroke: 0; }
+.marquee-band:hover span { -webkit-text-stroke-color: rgba(0,212,255,.85); }
+
+/* ── word-by-word reveal ── */
+.w-rev { display: inline-block; opacity: 0; transform: translateY(16px) rotate(2deg); filter: blur(4px); }
+.w-on .w-rev { opacity: 1; transform: none; filter: none;
+  transition: opacity .5s ease, transform .5s cubic-bezier(.2,.8,.25,1), filter .5s ease; }
+
+/* hero cinematic exit handled in JS via transform/opacity */
+.hero-content, #globe-wrap { will-change: transform, opacity; }
+</style>
+<div id="grain"></div>
+
+<script>
+/* ════════ SCROLL PHYSICS — velocity skew ════════ */
+(function () {
+  let lastY = scrollY, vel = 0;
+  const secs = document.querySelectorAll('section, footer');
+  (function phys() {
+    const dy = scrollY - lastY; lastY = scrollY;
+    vel += (dy - vel) * .12;
+    const skew = Math.max(-3.2, Math.min(3.2, vel * .055));
+    secs.forEach(s => s.style.transform = Math.abs(skew) > .02 ? `skewY(${skew}deg)` : '');
+    requestAnimationFrame(phys);
+  })();
+})();
+
+/* ════════ HERO CINEMATIC EXIT (zoom + fade on scroll) ════════ */
+(function () {
+  const hc = document.querySelector('.hero-content');
+  const gw = document.getElementById('globe-wrap');
+  const hs = document.querySelector('.hero-scroll');
+  addEventListener('scroll', () => {
+    const t = Math.min(scrollY / (innerHeight * .85), 1);
+    if (hc) {
+      hc.style.opacity = 1 - t * 1.15;
+      hc.style.transform = `translateY(${t * -70}px) scale(${1 - t * .12})`;
+    }
+    if (gw) { gw.style.opacity = .85 * (1 - t * 1.4); gw.style.transform = `translateY(calc(-50% + ${t * 90}px))`; }
+    if (hs) hs.style.opacity = 1 - t * 3;
+  }, { passive: true });
+})();
+
+/* ════════ MARQUEE BANDS (injected, scroll-reactive speed) ════════ */
+(function () {
+  function makeBand(words, after) {
+    const band = document.createElement('div');
+    band.className = 'marquee-band';
+    const track = document.createElement('div');
+    track.className = 'mq-track';
+    const seg = words.map((w, i) => i % 2 ? `<span><b>${w}</b></span>` : `<span>${w}</span>`).join('');
+    track.innerHTML = seg + seg + seg + seg;
+    band.appendChild(track);
+    after.insertAdjacentElement('afterend', band);
+    return track;
+  }
+  const t1 = makeBand(['DETECT','HUNT','RESPOND','CONTAIN','SECURE','TRIAGE'], document.getElementById('hero'));
+  const t2 = makeBand(['SIEM','EDR','MITRE ATT&CK','THREAT INTEL','VMDR','DFIR'], document.getElementById('certifications'));
+  let x1 = 0, x2 = 0, lastY = scrollY, boost = 0;
+  (function run() {
+    const dy = Math.abs(scrollY - lastY); lastY = scrollY;
+    boost += (Math.min(dy, 40) - boost) * .1;
+    const half1 = t1.scrollWidth / 2, half2 = t2.scrollWidth / 2;
+    x1 -= 0.9 + boost * .35; x2 += 0.7 + boost * .3;
+    if (-x1 > half1 / 2) x1 = 0;
+    if (x2 > 0) x2 = -half2 / 2;
+    t1.style.transform = `translateX(${x1}px)`;
+    t2.style.transform = `translateX(${x2}px)`;
+    requestAnimationFrame(run);
+  })();
+})();
+
+/* ════════ WORD-BY-WORD TEXT REVEAL ════════ */
+(function () {
+  document.querySelectorAll('.about-text > p, .contact-form > p').forEach(p => {
+    p.innerHTML = p.textContent.split(/\s+/).map(w => `<span class="w-rev">${w}</span>`).join(' ');
+    const words = p.querySelectorAll('.w-rev');
+    words.forEach((w, i) => w.style.transitionDelay = (i * 22) + 'ms');
+    new IntersectionObserver((es, o) => es.forEach(e => {
+      if (e.isIntersecting) { p.classList.add('w-on'); o.unobserve(p); }
+    }), { threshold: .35 }).observe(p);
+  });
+})();
+
+/* ════════ LIVING FAVICON — pulsing radar in the tab ════════ */
+(function () {
+  const link = document.querySelector("link[rel*='icon']") || (() => {
+    const l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); return l;
+  })();
+  const c = document.createElement('canvas'); c.width = c.height = 32;
+  const g = c.getContext('2d');
+  let a = 0;
+  setInterval(() => {
+    a += .45;
+    g.clearRect(0, 0, 32, 32);
+    g.fillStyle = '#0a1628'; g.beginPath(); g.arc(16, 16, 15, 0, 6.28); g.fill();
+    g.strokeStyle = 'rgba(0,212,255,.5)'; g.lineWidth = 1.5;
+    g.beginPath(); g.arc(16, 16, 12, 0, 6.28); g.stroke();
+    g.beginPath(); g.arc(16, 16, 6.5, 0, 6.28); g.stroke();
+    /* sweep */
+    const grad = g.createConicGradient ? g.createConicGradient(a, 16, 16) : null;
+    if (grad) {
+      grad.addColorStop(0, 'rgba(0,255,136,.9)'); grad.addColorStop(.18, 'rgba(0,255,136,0)');
+      grad.addColorStop(1, 'rgba(0,255,136,0)');
+      g.fillStyle = grad; g.beginPath();
+      g.moveTo(16, 16); g.arc(16, 16, 13, 0, 6.28); g.fill();
+    }
+    g.fillStyle = '#00ff88'; g.beginPath(); g.arc(16, 16, 2, 0, 6.28); g.fill();
+    /* blip */
+    const bx = 16 + 9 * Math.cos(a * .7), by = 16 + 9 * Math.sin(a * .7);
+    g.fillStyle = 'rgba(255,215,0,.95)'; g.beginPath(); g.arc(bx, by, 1.6, 0, 6.28); g.fill();
+    link.href = c.toDataURL('image/png');
+  }, 180);
+})();
+</script>
 </body>
 </html>
