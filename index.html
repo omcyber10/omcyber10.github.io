@@ -1528,7 +1528,7 @@ footer {
   <div class="hero-content">
     <div class="hero-badge"><span class="dot"></span> Open to Opportunities</div>
     <div class="hero-greeting"><span style="color:var(--grey-400);">access granted —</span> you've reached</div>
-    <h1 class="hero-name">Om Patel</h1>
+    <h1 class="hero-name" data-text="Om Patel">Om Patel</h1>
     <div class="hero-title-wrap">
       <span class="hero-title-prefix">$&gt;&nbsp;</span>
       <span id="typed-text"></span><span class="cursor-blink"></span>
@@ -2791,6 +2791,355 @@ document.addEventListener('visibilitychange', () => {
 /* ════════ CONSOLE EASTER EGG ════════ */
 console.log('%c┌─────────────────────────────────────────┐\n│  You opened DevTools. I like you already. │\n│  om@soc:~$ sudo hire_om                    │\n│  → ompatelclg@gmail.com                    │\n└─────────────────────────────────────────┘',
   'color:#00ff88;font-family:monospace;font-size:12px;');
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     ☠ GOD MODE LAYER — breach intro, HUD frame, targeting
+       reticle, decrypt-on-scroll, magnetic UI, holo cards
+═══════════════════════════════════════════════════════ -->
+<style>
+/* kill old loader & old cursor — superseded */
+#loader { display: none !important; }
+#cursor-dot, #cursor-ring { display: none !important; }
+
+/* ── BREACH INTRO ── */
+#breach {
+  position: fixed; inset: 0; z-index: 10000;
+  background: #020409;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+}
+#breach.done { display: none; }
+#breach-inner { width: min(560px, 90vw); }
+#breach-log { font-size: .8rem; line-height: 2; min-height: 200px; }
+#breach-log .bl { color: #3d5a80; }
+#breach-log .bl b { color: #8fb8de; font-weight: 500; }
+#breach-log .ok { color: var(--green); }
+#breach-log .crit { color: #ff5f57; }
+#breach-bar {
+  height: 3px; background: #0d1f3c; margin-top: 18px; border-radius: 2px; overflow: hidden;
+}
+#breach-bar i {
+  display: block; height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  box-shadow: 0 0 12px var(--green);
+}
+#breach-stamp {
+  position: absolute; inset: 0; display: none;
+  align-items: center; justify-content: center; flex-direction: column; gap: 10px;
+}
+#breach-stamp.show { display: flex; }
+#breach-stamp .stamp {
+  font-size: clamp(1.6rem, 5vw, 3.2rem); font-weight: 700; letter-spacing: .18em;
+  color: var(--green); border: 3px solid var(--green); padding: 14px 38px;
+  text-shadow: 0 0 30px rgba(0,255,136,.8);
+  box-shadow: 0 0 60px rgba(0,255,136,.25), inset 0 0 40px rgba(0,255,136,.08);
+  animation: stampIn .18s cubic-bezier(.2,2.5,.4,1) forwards;
+  transform: scale(3); opacity: 0;
+}
+@keyframes stampIn { to { transform: scale(1) rotate(-3deg); opacity: 1; } }
+#breach-stamp .sub { color: #3d5a80; font-size: .72rem; letter-spacing: .3em; }
+
+/* CRT power-on when site reveals */
+body.crt-on { animation: crtOn .55s ease-out; }
+@keyframes crtOn {
+  0%   { transform: scaleY(.004); filter: brightness(8); }
+  40%  { transform: scaleY(.02);  filter: brightness(6); }
+  60%  { transform: scaleY(1);    filter: brightness(2.4); }
+  100% { transform: scaleY(1);    filter: brightness(1); }
+}
+
+/* ── HUD FRAME (corner brackets + readout) ── */
+.hud-c {
+  position: fixed; width: 26px; height: 26px; z-index: 97; pointer-events: none;
+  border-color: rgba(0,212,255,.5); border-style: solid; border-width: 0;
+}
+#hud-tl { top: 78px;  left: 10px;  border-top-width: 2px; border-left-width: 2px; }
+#hud-tr { top: 78px;  right: 10px; border-top-width: 2px; border-right-width: 2px; }
+#hud-bl { bottom: 42px; left: 10px;  border-bottom-width: 2px; border-left-width: 2px; }
+#hud-br { bottom: 42px; right: 10px; border-bottom-width: 2px; border-right-width: 2px; }
+#hud-readout {
+  position: fixed; left: 14px; top: 50%; transform: translateY(-50%);
+  z-index: 97; pointer-events: none;
+  font-family: var(--font-mono); font-size: .58rem; letter-spacing: .12em;
+  color: rgba(0,212,255,.55); line-height: 2.1;
+  writing-mode: vertical-rl; text-orientation: mixed;
+}
+#hud-sector {
+  position: fixed; right: 14px; top: 50%; transform: translateY(-50%) rotate(180deg);
+  z-index: 97; pointer-events: none;
+  font-family: var(--font-mono); font-size: .58rem; letter-spacing: .3em;
+  color: rgba(0,255,136,.6);
+  writing-mode: vertical-rl;
+}
+@media (max-width: 900px) { .hud-c, #hud-readout, #hud-sector { display: none; } }
+
+/* ── TARGETING RETICLE CURSOR ── */
+@media (pointer: fine) {
+  #reticle {
+    position: fixed; z-index: 99999; pointer-events: none;
+    width: 42px; height: 42px; transform: translate(-50%,-50%);
+    transition: width .22s ease, height .22s ease;
+  }
+  #reticle .rc {
+    position: absolute; width: 11px; height: 11px;
+    border-color: var(--cyan); border-style: solid; border-width: 0;
+    transition: all .22s ease;
+    filter: drop-shadow(0 0 4px rgba(0,212,255,.8));
+  }
+  #reticle .rc.tl { top: 0; left: 0; border-top-width: 1.5px; border-left-width: 1.5px; }
+  #reticle .rc.tr { top: 0; right: 0; border-top-width: 1.5px; border-right-width: 1.5px; }
+  #reticle .rc.bl { bottom: 0; left: 0; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+  #reticle .rc.br { bottom: 0; right: 0; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+  #reticle .rdot {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 3px; height: 3px; border-radius: 50%; background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+  }
+  #reticle .rlabel {
+    position: absolute; top: -19px; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: .55rem; letter-spacing: .18em;
+    color: var(--green); white-space: nowrap; opacity: 0; transition: opacity .2s;
+    text-shadow: 0 0 8px rgba(0,255,136,.7);
+  }
+  #reticle.locked { width: 64px; height: 64px; }
+  #reticle.locked .rc { border-color: var(--green); filter: drop-shadow(0 0 6px rgba(0,255,136,.9)); }
+  #reticle.locked .rdot { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  #reticle.locked .rlabel { opacity: 1; }
+  #reticle.firing { animation: retFire .18s ease; }
+  @keyframes retFire { 50% { transform: translate(-50%,-50%) scale(.72); } }
+  /* full-viewport faint crosshair lines */
+  #xhair-h, #xhair-v { position: fixed; z-index: 99998; pointer-events: none; background: rgba(0,212,255,.07); }
+  #xhair-h { left: 0; right: 0; height: 1px; }
+  #xhair-v { top: 0; bottom: 0; width: 1px; }
+}
+@media (pointer: coarse) { #reticle, #xhair-h, #xhair-v { display: none; } }
+
+/* ── RGB-split glitch slices on hero name ── */
+.hero-name::before, .hero-name::after {
+  content: attr(data-text);
+  position: absolute; inset: 0;
+  background: inherit; -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: 0; pointer-events: none;
+}
+.hero-name.glitching::before {
+  opacity: .85; -webkit-text-fill-color: #ff2d78;
+  clip-path: polygon(0 12%, 100% 12%, 100% 38%, 0 38%);
+  transform: translate(-7px, -2px);
+}
+.hero-name.glitching::after {
+  opacity: .85; -webkit-text-fill-color: #00f0ff;
+  clip-path: polygon(0 58%, 100% 58%, 100% 86%, 0 86%);
+  transform: translate(7px, 2px);
+}
+
+/* ── HOLO SHINE on cards (follows cursor) ── */
+.project-card, .cert-card, .edu-card, .skill-category, .exp-card {
+  position: relative;
+}
+.holo::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(420px circle at var(--hx,50%) var(--hy,50%),
+              rgba(0,212,255,.1), rgba(42,111,188,.05) 35%, transparent 65%);
+  opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 1;
+}
+.holo:hover::before { opacity: 1; }
+
+/* ── subtle permanent CRT flicker ── */
+@keyframes crtFlicker { 0%,100% { opacity: 1; } 96% { opacity: 1; } 97% { opacity: .94; } 98% { opacity: 1; } 99% { opacity: .97; } }
+#hero .hero-content { animation: crtFlicker 7s infinite; }
+
+/* decrypt char styling */
+.decrypting { color: var(--green) !important; }
+</style>
+
+<!-- breach intro -->
+<div id="breach">
+  <div id="breach-inner">
+    <div id="breach-log"></div>
+    <div id="breach-bar"><i id="breach-fill"></i></div>
+  </div>
+  <div id="breach-stamp">
+    <div class="stamp">ACCESS GRANTED</div>
+    <div class="sub">WELCOME TO OM PATEL // SECURE PERIMETER</div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div class="hud-c" id="hud-tl"></div><div class="hud-c" id="hud-tr"></div>
+<div class="hud-c" id="hud-bl"></div><div class="hud-c" id="hud-br"></div>
+<div id="hud-readout">X:0000 Y:0000 · SCROLL:00% · T+00:00</div>
+<div id="hud-sector">SECTOR // HERO</div>
+
+<!-- reticle -->
+<div id="xhair-h"></div><div id="xhair-v"></div>
+<div id="reticle">
+  <span class="rc tl"></span><span class="rc tr"></span>
+  <span class="rc bl"></span><span class="rc br"></span>
+  <span class="rdot"></span>
+  <span class="rlabel">[ TARGET LOCKED ]</span>
+</div>
+
+<script>
+/* ════════ BREACH INTRO SEQUENCE ════════ */
+(function () {
+  const log   = document.getElementById('breach-log');
+  const fill  = document.getElementById('breach-fill');
+  const stamp = document.getElementById('breach-stamp');
+  const breach= document.getElementById('breach');
+  const inner = document.getElementById('breach-inner');
+  const seq = [
+    ['<b>om-sec</b> :: initiating handshake with visitor…', 160],
+    ['resolving identity ……… <span class="ok">RECRUITER-CLASS ENTITY DETECTED</span>', 420],
+    ['running background check on <b>you</b> ……… <span class="ok">CLEAN</span>', 380],
+    ['decrypting portfolio payload ……… <span class="ok">AES-256 OK</span>', 360],
+    ['loading 5 certifications, 3 roles, 2 labs ……… <span class="ok">DONE</span>', 400],
+    ['<span class="crit">WARNING:</span> candidate may exceed expectations', 460],
+    ['granting clearance level: <span class="ok">FULL ACCESS</span>', 380],
+  ];
+  let i = 0, total = seq.reduce((a, s) => a + s[1], 0), elapsed = 0;
+  document.body.style.overflow = 'hidden';
+  function next() {
+    if (i < seq.length) {
+      const d = document.createElement('div');
+      d.className = 'bl'; d.innerHTML = '&gt; ' + seq[i][0];
+      log.appendChild(d);
+      elapsed += seq[i][1];
+      fill.style.width = (elapsed / total * 100) + '%';
+      setTimeout(next, seq[i++][1]);
+    } else {
+      inner.style.display = 'none';
+      stamp.classList.add('show');
+      setTimeout(() => {
+        breach.classList.add('done');
+        document.body.style.overflow = '';
+        document.body.classList.add('crt-on');
+      }, 1100);
+    }
+  }
+  setTimeout(next, 300);
+  /* impatient visitors can skip */
+  breach.addEventListener('click', () => {
+    breach.classList.add('done');
+    document.body.style.overflow = '';
+    document.body.classList.add('crt-on');
+  });
+})();
+
+/* ════════ TARGETING RETICLE ════════ */
+(function () {
+  const ret = document.getElementById('reticle');
+  const xh  = document.getElementById('xhair-h');
+  const xv  = document.getElementById('xhair-v');
+  if (!ret) return;
+  let tx = -100, ty = -100, x = -100, y = -100;
+  document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+  (function loop() {
+    x += (tx - x) * .35; y += (ty - y) * .35;
+    ret.style.left = x + 'px'; ret.style.top = y + 'px';
+    xh.style.top = ty + 'px'; xv.style.left = tx + 'px';
+    requestAnimationFrame(loop);
+  })();
+  const sel = 'a, button, input, textarea, .skill-tag, .cert-card, .project-card, .edu-card, .stat-card, .contact-link';
+  document.addEventListener('mouseover', e => { if (e.target.closest(sel)) ret.classList.add('locked'); });
+  document.addEventListener('mouseout',  e => { if (e.target.closest(sel)) ret.classList.remove('locked'); });
+  document.addEventListener('mousedown', () => {
+    ret.classList.add('firing');
+    setTimeout(() => ret.classList.remove('firing'), 200);
+  });
+})();
+
+/* ════════ HUD READOUT ════════ */
+(function () {
+  const ro = document.getElementById('hud-readout');
+  const sec = document.getElementById('hud-sector');
+  if (!ro) return;
+  let mx = 0, my = 0; const t0 = Date.now();
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  const pad = (n, l = 4) => String(n).padStart(l, '0');
+  setInterval(() => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const sc  = Math.round(scrollY / Math.max(max, 1) * 100);
+    const s   = Math.floor((Date.now() - t0) / 1000);
+    ro.textContent = `X:${pad(mx)} Y:${pad(my)} · SCROLL:${pad(sc,2)}% · T+${pad(Math.floor(s/60),2)}:${pad(s%60,2)}`;
+    let cur = 'HERO';
+    document.querySelectorAll('section[id]').forEach(el => {
+      if (scrollY >= el.offsetTop - 200) cur = el.id.toUpperCase();
+    });
+    sec.textContent = 'SECTOR // ' + cur;
+  }, 120);
+})();
+
+/* ════════ DECRYPT-ON-SCROLL TEXT ════════ */
+(function () {
+  const GLYPHS = '!<>-_\\/[]{}—=+*^?#01ABCDEF$%&';
+  function scramble(el) {
+    const nodes = [];
+    (function walk(n) {
+      n.childNodes.forEach(c => {
+        if (c.nodeType === 3 && c.textContent.trim()) nodes.push(c);
+        else if (c.nodeType === 1) walk(c);
+      });
+    })(el);
+    nodes.forEach(node => {
+      const orig = node.textContent;
+      let frame = 0; const totalFrames = 24;
+      const iv = setInterval(() => {
+        frame++;
+        const reveal = Math.floor(orig.length * frame / totalFrames);
+        let out = '';
+        for (let i = 0; i < orig.length; i++) {
+          out += i < reveal ? orig[i]
+               : orig[i] === ' ' ? ' '
+               : GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+        }
+        node.textContent = out;
+        if (frame >= totalFrames) { node.textContent = orig; clearInterval(iv); }
+      }, 38);
+    });
+  }
+  const obs = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { scramble(e.target); obs.unobserve(e.target); }
+  }), { threshold: .6 });
+  document.querySelectorAll('.section-title, .hero-tagline').forEach(el => obs.observe(el));
+  /* nav logo re-scrambles on hover */
+  const logo = document.querySelector('.nav-logo .name');
+  if (logo) logo.parentElement.addEventListener('mouseenter', () => scramble(logo));
+})();
+
+/* ════════ MAGNETIC BUTTONS ════════ */
+document.querySelectorAll('.btn, .hero-social a, .footer-social a, #term-fab').forEach(el => {
+  el.addEventListener('mousemove', e => {
+    const r = el.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2);
+    const dy = e.clientY - (r.top + r.height / 2);
+    el.style.transform = `translate(${dx * .22}px, ${dy * .22}px)`;
+  });
+  el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+});
+
+/* ════════ HOLO SHINE TRACKING ════════ */
+document.querySelectorAll('.project-card, .cert-card, .edu-card, .skill-category, .exp-card').forEach(c => {
+  c.classList.add('holo');
+  c.addEventListener('mousemove', e => {
+    const r = c.getBoundingClientRect();
+    c.style.setProperty('--hx', ((e.clientX - r.left) / r.width * 100) + '%');
+    c.style.setProperty('--hy', ((e.clientY - r.top) / r.height * 100) + '%');
+  });
+});
+
+/* ════════ HERO MOUSE PARALLAX ════════ */
+(function () {
+  const hc = document.querySelector('.hero-content');
+  const hero = document.getElementById('hero');
+  if (!hc || !hero) return;
+  hero.addEventListener('mousemove', e => {
+    const x = (e.clientX / innerWidth - .5), y = (e.clientY / innerHeight - .5);
+    hc.style.transform = `translate(${x * -14}px, ${y * -10}px)`;
+  });
+  hero.addEventListener('mouseleave', () => { hc.style.transform = ''; });
+})();
 </script>
 </body>
 </html>
