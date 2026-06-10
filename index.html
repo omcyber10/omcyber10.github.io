@@ -1500,6 +1500,7 @@ footer {
     <li><a href="#about">About</a></li>
     <li><a href="#skills">Skills</a></li>
     <li><a href="#projects">Projects</a></li>
+    <li><a href="#toolkit">Toolkit</a></li>
     <li><a href="#experience">Experience</a></li>
     <li><a href="#certifications">Certs</a></li>
     <li><a href="#education">Education</a></li>
@@ -1515,6 +1516,7 @@ footer {
   <a href="#about"          onclick="closeMobile()">About</a>
   <a href="#skills"         onclick="closeMobile()">Skills</a>
   <a href="#projects"       onclick="closeMobile()">Projects</a>
+  <a href="#toolkit"        onclick="closeMobile()">Toolkit</a>
   <a href="#experience"     onclick="closeMobile()">Experience</a>
   <a href="#certifications" onclick="closeMobile()">Certifications</a>
   <a href="#education"      onclick="closeMobile()">Education</a>
@@ -1800,6 +1802,159 @@ footer {
     </div>
   </div>
 </section>
+
+<!-- ═══════ SOC TOOLKIT — live working tools ═══════ -->
+<section id="toolkit">
+  <div class="container">
+    <div class="section-label">03.5 &mdash; Live Tools</div>
+    <h2 class="section-title">SOC <span>Toolkit</span></h2>
+    <div class="section-divider"></div>
+    <p style="color:var(--grey-200);font-size:.95rem;margin:-1.5rem 0 2rem;max-width:640px;">
+      Not screenshots — <span style="color:var(--cyan);">working tools</span>, built from scratch, running entirely in your browser. The same analysis I do daily, miniaturized. Try them.
+    </p>
+
+    <div class="tk-tabs">
+      <button class="tk-tab active" data-tool="ioc"><i class="fa fa-crosshairs"></i> IOC Extractor</button>
+      <button class="tk-tab" data-tool="phish"><i class="fa fa-fish"></i> Phishing Analyzer</button>
+      <button class="tk-tab" data-tool="pass"><i class="fa fa-key"></i> Password Auditor</button>
+      <button class="tk-tab" data-tool="decode"><i class="fa fa-unlock"></i> Decoder / Hash ID</button>
+    </div>
+
+    <!-- IOC EXTRACTOR -->
+    <div class="tk-panel active" id="tk-ioc">
+      <div class="tk-grid">
+        <div>
+          <label class="tk-label">PASTE RAW LOGS / EMAIL HEADERS / THREAT REPORT</label>
+          <textarea class="tk-input" id="ioc-in" rows="9" placeholder="Paste anything — I'll hunt the IOCs out of it.&#10;&#10;Try: Connection from 185.220.101.45 to evil-c2.baddomain.xyz, payload hash d41d8cd98f00b204e9800998ecf8427e, callback https://malicious.example.ru/gate.php, reply-to attacker@phish-mail.top"></textarea>
+          <div class="tk-row">
+            <button class="tk-btn" id="ioc-run"><i class="fa fa-magnifying-glass"></i> EXTRACT</button>
+            <label class="tk-check"><input type="checkbox" id="ioc-defang" checked> defang output</label>
+            <button class="tk-btn ghost" id="ioc-copy"><i class="fa fa-copy"></i> COPY ALL</button>
+          </div>
+        </div>
+        <div>
+          <label class="tk-label">EXTRACTED INDICATORS</label>
+          <div class="tk-out" id="ioc-out"><span class="tk-dim">// output appears here — IPs, domains, URLs, emails, MD5/SHA1/SHA256 hashes</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHISHING ANALYZER -->
+    <div class="tk-panel" id="tk-phish">
+      <div class="tk-grid">
+        <div>
+          <label class="tk-label">PASTE SUSPICIOUS EMAIL TEXT</label>
+          <textarea class="tk-input" id="ph-in" rows="9" placeholder="Paste the body of a suspicious email...&#10;&#10;Try: URGENT: Your account will be suspended in 24 hours! Verify immediately at http://192.168.4.12/secure-login or click hxxp://paypa1-verify.top/signin. Dear Customer, confirm your password now."></textarea>
+          <div class="tk-row">
+            <button class="tk-btn" id="ph-run"><i class="fa fa-shield-halved"></i> ANALYZE</button>
+          </div>
+        </div>
+        <div>
+          <label class="tk-label">RISK ASSESSMENT</label>
+          <div class="tk-gauge-wrap">
+            <div class="tk-gauge"><div class="tk-gauge-fill" id="ph-fill"></div></div>
+            <div class="tk-gauge-num" id="ph-score">—</div>
+          </div>
+          <div class="tk-out" id="ph-out" style="min-height:160px;"><span class="tk-dim">// red flags will be itemized here with severity</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASSWORD AUDITOR -->
+    <div class="tk-panel" id="tk-pass">
+      <div class="tk-grid">
+        <div>
+          <label class="tk-label">TYPE A PASSWORD (never sent anywhere — airgapped in your browser)</label>
+          <input type="text" class="tk-input" id="pw-in" placeholder="Tr0ub4dor&3" autocomplete="off">
+          <div class="tk-meter"><div class="tk-meter-fill" id="pw-bar"></div></div>
+          <div class="tk-verdict" id="pw-verdict">awaiting input…</div>
+        </div>
+        <div>
+          <label class="tk-label">CRACK-TIME ESTIMATE</label>
+          <div class="tk-out" id="pw-out"><span class="tk-dim">// entropy, charset, offline & online attack estimates</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DECODER -->
+    <div class="tk-panel" id="tk-decode">
+      <div class="tk-grid">
+        <div>
+          <label class="tk-label">PASTE ANYTHING ENCODED — I'LL FIGURE OUT WHAT IT IS</label>
+          <textarea class="tk-input" id="dc-in" rows="9" placeholder="Base64, hex, URL-encoding, JWT tokens, or a hash to identify...&#10;&#10;Try: SGlyZSBPbSBQYXRlbCAtIGhlIGRlY29kZXMgdGhyZWF0cyBmb3IgYSBsaXZpbmcu"></textarea>
+          <div class="tk-row">
+            <button class="tk-btn" id="dc-run"><i class="fa fa-wand-magic-sparkles"></i> AUTO-DECODE</button>
+          </div>
+        </div>
+        <div>
+          <label class="tk-label">ANALYSIS</label>
+          <div class="tk-out" id="dc-out"><span class="tk-dim">// detection + decoded output. JWTs get fully unpacked.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+#toolkit { background: var(--navy-mid); }
+.tk-tabs { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
+.tk-tab {
+  font-family: var(--font-mono); font-size: .76rem; letter-spacing: .05em;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  background: rgba(255,255,255,.04); color: var(--grey-200);
+  border: 1px solid rgba(255,255,255,.09); transition: all .25s;
+}
+.tk-tab:hover { border-color: rgba(0,212,255,.35); color: var(--cyan); }
+.tk-tab.active {
+  background: rgba(0,212,255,.1); color: var(--cyan);
+  border-color: rgba(0,212,255,.45); box-shadow: 0 0 18px rgba(0,212,255,.12);
+}
+.tk-panel { display: none; }
+.tk-panel.active { display: block; animation: tkIn .3s ease; }
+@keyframes tkIn { from { opacity: 0; transform: translateY(8px); } }
+.tk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; }
+@media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }
+.tk-label {
+  display: block; font-family: var(--font-mono); font-size: .66rem;
+  color: var(--cyan); letter-spacing: .14em; margin-bottom: 8px;
+}
+.tk-input {
+  width: 100%; background: rgba(0,0,0,.35); color: #d7e7ff;
+  border: 1px solid rgba(255,255,255,.1); border-radius: 10px;
+  font-family: var(--font-mono); font-size: .78rem; line-height: 1.7;
+  padding: 14px; outline: none; resize: vertical; transition: border .25s, box-shadow .25s;
+}
+.tk-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(42,111,188,.15); }
+.tk-row { display: flex; gap: .8rem; align-items: center; margin-top: .9rem; flex-wrap: wrap; }
+.tk-btn {
+  font-family: var(--font-mono); font-size: .74rem; letter-spacing: .08em;
+  padding: 10px 18px; border-radius: 8px; cursor: pointer;
+  background: linear-gradient(135deg, var(--blue), var(--blue-bright)); color: #fff;
+  border: none; transition: all .25s; box-shadow: 0 4px 16px rgba(42,111,188,.3);
+}
+.tk-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(42,111,188,.45); }
+.tk-btn.ghost { background: none; border: 1px solid rgba(0,212,255,.3); color: var(--cyan); box-shadow: none; }
+.tk-btn.ghost:hover { background: rgba(0,212,255,.08); }
+.tk-check { font-family: var(--font-mono); font-size: .7rem; color: var(--grey-400); display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.tk-out {
+  background: #060d18; border: 1px solid rgba(0,255,136,.14); border-radius: 10px;
+  font-family: var(--font-mono); font-size: .75rem; line-height: 1.9;
+  padding: 14px; min-height: 230px; max-height: 330px; overflow-y: auto;
+  white-space: pre-wrap; word-break: break-all; color: #b8ffd9;
+}
+.tk-dim { color: var(--grey-400); }
+.tk-h { color: var(--cyan); font-weight: 600; }
+.tk-bad { color: #ff6b6b; }
+.tk-warn { color: #ffd700; }
+.tk-good { color: var(--green); }
+.tk-gauge-wrap { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.tk-gauge { flex: 1; height: 10px; background: rgba(255,255,255,.07); border-radius: 5px; overflow: hidden; }
+.tk-gauge-fill { height: 100%; width: 0%; border-radius: 5px; transition: width .8s cubic-bezier(.2,.8,.3,1), background .4s; background: var(--green); }
+.tk-gauge-num { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; color: var(--cyan); min-width: 64px; text-align: right; }
+.tk-meter { height: 10px; background: rgba(255,255,255,.07); border-radius: 5px; overflow: hidden; margin-top: 12px; }
+.tk-meter-fill { height: 100%; width: 0%; transition: width .4s, background .4s; background: #ff6b6b; }
+.tk-verdict { font-family: var(--font-mono); font-size: .78rem; margin-top: 8px; color: var(--grey-400); }
+</style>
 
 <!-- ═══════ EXPERIENCE ═══════ -->
 <section id="experience">
@@ -3860,18 +4015,7 @@ section { will-change: transform; }
 <div id="grain"></div>
 
 <script>
-/* ════════ SCROLL PHYSICS — velocity skew ════════ */
-(function () {
-  let lastY = scrollY, vel = 0;
-  const secs = document.querySelectorAll('section, footer');
-  (function phys() {
-    const dy = scrollY - lastY; lastY = scrollY;
-    vel += (dy - vel) * .12;
-    const skew = Math.max(-3.2, Math.min(3.2, vel * .055));
-    secs.forEach(s => s.style.transform = Math.abs(skew) > .02 ? `skewY(${skew}deg)` : '');
-    requestAnimationFrame(phys);
-  })();
-})();
+/* (scroll skew removed by request) */
 
 /* ════════ HERO CINEMATIC EXIT (zoom + fade on scroll) ════════ */
 (function () {
@@ -3928,6 +4072,202 @@ section { will-change: transform; }
       if (e.isIntersecting) { p.classList.add('w-on'); o.unobserve(p); }
     }), { threshold: .35 }).observe(p);
   });
+})();
+
+/* ════════ SOC TOOLKIT ENGINES ════════ */
+(function () {
+  /* tabs */
+  document.querySelectorAll('.tk-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tk-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tk-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tk-' + tab.dataset.tool).classList.add('active');
+    });
+  });
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+  /* ── 1. IOC EXTRACTOR ── */
+  const IOC_RE = {
+    'IPv4':    /\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/g,
+    'SHA256':  /\b[a-fA-F0-9]{64}\b/g,
+    'SHA1':    /\b[a-fA-F0-9]{40}\b/g,
+    'MD5':     /\b[a-fA-F0-9]{32}\b/g,
+    'URL':     /\bh(?:xx|tt)ps?:\/\/[^\s"'<>)\]]+/gi,
+    'Email':   /\b[\w.+-]+@[\w-]+\.[\w.]{2,}\b/g,
+    'Domain':  /\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:com|net|org|io|ru|cn|xyz|top|info|biz|co|me|cc|pw|tk|site|online|club|live|app|dev|email|link)\b/gi,
+  };
+  function defang(s) {
+    return s.replace(/\./g, '[.]').replace(/^http/i, 'hxxp').replace(/:\/\//, '[://]');
+  }
+  document.getElementById('ioc-run').addEventListener('click', () => {
+    const txt = document.getElementById('ioc-in').value;
+    const doDefang = document.getElementById('ioc-defang').checked;
+    const out = document.getElementById('ioc-out');
+    if (!txt.trim()) { out.innerHTML = '<span class="tk-bad">// nothing to scan — paste some data first</span>'; return; }
+    let html = '', total = 0, used = new Set();
+    for (const [name, re] of Object.entries(IOC_RE)) {
+      const found = [...new Set((txt.match(re) || []))].filter(m => !used.has(m.toLowerCase()));
+      if (name === 'Domain') {
+        /* drop domains already captured inside URLs/emails */
+        const lower = [...used];
+        const f2 = found.filter(d => !lower.some(u => u.includes(d.toLowerCase())));
+        f2.forEach(m => used.add(m.toLowerCase()));
+        if (f2.length) { html += `<span class="tk-h">── ${name} (${f2.length}) ──</span>\n` + f2.map(m => '  ' + esc(doDefang ? defang(m) : m)).join('\n') + '\n'; total += f2.length; }
+        continue;
+      }
+      found.forEach(m => used.add(m.toLowerCase()));
+      if (found.length) {
+        html += `<span class="tk-h">── ${name} (${found.length}) ──</span>\n` +
+          found.map(m => '  ' + esc(doDefang && (name === 'URL' || name === 'IPv4' || name === 'Email') ? defang(m) : m)).join('\n') + '\n';
+        total += found.length;
+      }
+    }
+    out.innerHTML = total
+      ? `<span class="tk-good">// ${total} unique indicators extracted${doDefang ? ' (defanged — safe to share)' : ''}</span>\n` + html
+      : '<span class="tk-warn">// no indicators found in this text</span>';
+    beep(1100, .06, .05);
+  });
+  document.getElementById('ioc-copy').addEventListener('click', function () {
+    navigator.clipboard.writeText(document.getElementById('ioc-out').innerText).then(() => {
+      this.innerHTML = '<i class="fa fa-check"></i> COPIED';
+      setTimeout(() => this.innerHTML = '<i class="fa fa-copy"></i> COPY ALL', 1600);
+    });
+  });
+
+  /* ── 2. PHISHING ANALYZER ── */
+  const PH_RULES = [
+    { re: /urgent|immediate(ly)?|within 24|asap|right away|act now|final (notice|warning)/i, w: 18, m: 'Urgency pressure language' },
+    { re: /suspend|locked|deactivat|terminat|closure|restricted/i, w: 14, m: 'Account-threat intimidation' },
+    { re: /\b(?:\d{1,3}\.){3}\d{1,3}\b.*(login|signin|secure|verify)|((login|signin|secure|verify).*\b(?:\d{1,3}\.){3}\d{1,3}\b)/i, w: 22, m: 'Raw IP address used as login URL' },
+    { re: /h(xx|tt)ps?:\/\/[^\s]*\.(xyz|top|tk|pw|cc|club|online|site|ru|cn)\b/i, w: 18, m: 'Link to high-risk TLD' },
+    { re: /paypa1|g00gle|micros0ft|amaz0n|app1e|faceb00k|netfl1x|[a-z]+-(verify|secure|support|login)\./i, w: 24, m: 'Typosquatted / lookalike brand domain' },
+    { re: /dear (customer|user|client|member|sir|madam)/i, w: 10, m: 'Generic greeting (no name)' },
+    { re: /verify (your )?(account|identity|password|information)|confirm your (password|details|identity)/i, w: 16, m: 'Credential harvesting request' },
+    { re: /bit\.ly|tinyurl|goo\.gl|t\.co|is\.gd|cutt\.ly/i, w: 12, m: 'URL shortener obscuring destination' },
+    { re: /\.(exe|scr|vbs|js|bat|cmd|jar|iso|img)\b/i, w: 20, m: 'Executable attachment reference' },
+    { re: /wire transfer|gift ?card|bitcoin|crypto wallet|western union|payment update/i, w: 16, m: 'Financial lure' },
+    { re: /winner|congratulations|prize|lottery|inheritance|million/i, w: 14, m: 'Too-good-to-be-true lure' },
+    { re: /!{2,}|URGENT|IMMEDIATELY/, w: 6, m: 'Excessive emphasis / shouting' },
+  ];
+  document.getElementById('ph-run').addEventListener('click', () => {
+    const txt = document.getElementById('ph-in').value;
+    const out = document.getElementById('ph-out');
+    const fill = document.getElementById('ph-fill');
+    const scoreEl = document.getElementById('ph-score');
+    if (!txt.trim()) { out.innerHTML = '<span class="tk-bad">// paste an email body first</span>'; return; }
+    let score = 0; const hits = [];
+    PH_RULES.forEach(r => { if (r.re.test(txt)) { score += r.w; hits.push(r); } });
+    score = Math.min(100, score);
+    const sev = score >= 60 ? ['MALICIOUS', 'tk-bad', '#ff6b6b'] : score >= 30 ? ['SUSPICIOUS', 'tk-warn', '#ffd700'] : ['LIKELY BENIGN', 'tk-good', '#00ff88'];
+    fill.style.width = Math.max(score, 4) + '%';
+    fill.style.background = sev[2];
+    scoreEl.textContent = score + '/100';
+    scoreEl.style.color = sev[2];
+    out.innerHTML = `<span class="${sev[1]}">// VERDICT: ${sev[0]} — ${hits.length} red flag${hits.length === 1 ? '' : 's'} detected</span>\n` +
+      (hits.length
+        ? hits.map(h => `  <span class="${h.w >= 18 ? 'tk-bad' : 'tk-warn'}">[+${h.w}]</span> ${h.m}`).join('\n')
+        : '  <span class="tk-good">no classic phishing patterns matched</span>') +
+      `\n\n<span class="tk-dim">// heuristic triage only — always verify sender domain & headers</span>`;
+    beep(score >= 60 ? 240 : 1100, .1, .06, score >= 60 ? 'sawtooth' : 'sine');
+  });
+
+  /* ── 3. PASSWORD AUDITOR ── */
+  const COMMON = ['password','123456','12345678','qwerty','abc123','letmein','admin','welcome','monkey','iloveyou','dragon','111111','123123','password1','qwerty123'];
+  function fmtTime(sec) {
+    if (sec < 1) return 'instantly';
+    const u = [[31536000 * 1e9,'billion years'],[31536000 * 1e6,'million years'],[31536000 * 1000,'millennia'],[31536000,'years'],[2592000,'months'],[86400,'days'],[3600,'hours'],[60,'minutes'],[1,'seconds']];
+    for (const [s, n] of u) if (sec >= s) return `${Math.round(sec / s).toLocaleString()} ${n}`;
+    return 'instantly';
+  }
+  document.getElementById('pw-in').addEventListener('input', function () {
+    const pw = this.value;
+    const bar = document.getElementById('pw-bar');
+    const verdict = document.getElementById('pw-verdict');
+    const out = document.getElementById('pw-out');
+    if (!pw) { bar.style.width = '0%'; verdict.textContent = 'awaiting input…'; out.innerHTML = '<span class="tk-dim">// entropy, charset, offline & online attack estimates</span>'; return; }
+    let pool = 0;
+    if (/[a-z]/.test(pw)) pool += 26;
+    if (/[A-Z]/.test(pw)) pool += 26;
+    if (/\d/.test(pw)) pool += 10;
+    if (/[^a-zA-Z0-9]/.test(pw)) pool += 33;
+    let entropy = pw.length * Math.log2(pool || 1);
+    const flags = [];
+    if (COMMON.some(c => pw.toLowerCase().includes(c))) { entropy *= .25; flags.push('contains a top-15 common password'); }
+    if (/(.)\1{2,}/.test(pw)) { entropy *= .8; flags.push('repeated characters'); }
+    if (/(?:012|123|234|345|456|567|678|789|abc|bcd|cde|qwe|wer|ert|asd|sdf)/i.test(pw)) { entropy *= .75; flags.push('sequential pattern'); }
+    if (/(19|20)\d{2}/.test(pw)) { entropy *= .85; flags.push('contains a year'); }
+    const guesses = Math.pow(2, entropy);
+    const offline = guesses / 2 / 1e10;     /* 10 B/s GPU rig */
+    const online  = guesses / 2 / 100;      /* 100/s throttled */
+    const pct = Math.min(100, entropy / 90 * 100);
+    const col = entropy >= 70 ? '#00ff88' : entropy >= 50 ? '#00d4ff' : entropy >= 35 ? '#ffd700' : '#ff6b6b';
+    bar.style.width = pct + '%'; bar.style.background = col;
+    const label = entropy >= 70 ? 'FORTRESS' : entropy >= 50 ? 'STRONG' : entropy >= 35 ? 'MEDIOCRE' : 'CRACKABLE';
+    verdict.innerHTML = `<span style="color:${col}">${label}</span> — ${Math.round(entropy)} bits of entropy`;
+    out.innerHTML =
+      `<span class="tk-h">── analysis ──</span>\n` +
+      `  length        : ${pw.length} chars\n` +
+      `  charset pool  : ${pool} symbols\n` +
+      `  entropy       : ${Math.round(entropy)} bits\n\n` +
+      `<span class="tk-h">── time to crack (avg) ──</span>\n` +
+      `  offline GPU rig (10B/s) : <b style="color:${col}">${fmtTime(offline)}</b>\n` +
+      `  online throttled (100/s): <b style="color:${col}">${fmtTime(online)}</b>\n` +
+      (flags.length ? `\n<span class="tk-warn">── weaknesses ──</span>\n` + flags.map(f => `  <span class="tk-warn">⚠</span> ${f}`).join('\n') : '\n<span class="tk-good">✓ no common weakness patterns</span>');
+  });
+
+  /* ── 4. DECODER / HASH ID ── */
+  document.getElementById('dc-run').addEventListener('click', () => {
+    const raw = document.getElementById('dc-in').value.trim();
+    const out = document.getElementById('dc-out');
+    if (!raw) { out.innerHTML = '<span class="tk-bad">// paste something first</span>'; return; }
+    const results = [];
+    /* JWT */
+    if (/^eyJ[\w-]+\.[\w-]+\.[\w-]*$/.test(raw)) {
+      try {
+        const [h, p] = raw.split('.');
+        const dec = s => JSON.stringify(JSON.parse(atob(s.replace(/-/g,'+').replace(/_/g,'/'))), null, 2);
+        results.push(['JWT TOKEN DETECTED', `<span class="tk-h">header:</span>\n${esc(dec(h))}\n<span class="tk-h">payload:</span>\n${esc(dec(p))}\n<span class="tk-dim">signature: (cannot verify without key)</span>`]);
+      } catch (e) {}
+    }
+    /* hash ID */
+    if (/^[a-fA-F0-9]+$/.test(raw)) {
+      const L = { 32: 'MD5', 40: 'SHA-1', 56: 'SHA-224', 64: 'SHA-256', 96: 'SHA-384', 128: 'SHA-512' }[raw.length];
+      if (L) results.push(['HASH IDENTIFIED', `format : <span class="tk-h">${L}</span> (${raw.length} hex chars)\n<span class="tk-dim">// one-way digest — cannot be decoded, only cracked</span>`]);
+      else if (raw.length % 2 === 0) {
+        try {
+          const ascii = raw.match(/.{2}/g).map(h => String.fromCharCode(parseInt(h, 16))).join('');
+          if (/^[\x20-\x7e]+$/.test(ascii)) results.push(['HEX → ASCII', esc(ascii)]);
+        } catch (e) {}
+      }
+    }
+    /* base64 */
+    if (!results.length && /^[A-Za-z0-9+/=\s]+$/.test(raw) && raw.replace(/\s/g,'').length % 4 === 0) {
+      try {
+        const dec = atob(raw.replace(/\s/g,''));
+        if (/^[\x09\x0a\x0d\x20-\x7e]+$/.test(dec)) results.push(['BASE64 DECODED', esc(dec)]);
+      } catch (e) {}
+    }
+    /* URL-encoded */
+    if (/%[0-9a-fA-F]{2}/.test(raw)) {
+      try { const dec = decodeURIComponent(raw); if (dec !== raw) results.push(['URL-DECODED', esc(dec)]); } catch (e) {}
+    }
+    /* binary */
+    if (/^[01\s]+$/.test(raw) && raw.replace(/\s/g,'').length % 8 === 0) {
+      const dec = raw.replace(/\s/g,'').match(/.{8}/g).map(b => String.fromCharCode(parseInt(b, 2))).join('');
+      if (/^[\x20-\x7e]+$/.test(dec)) results.push(['BINARY → ASCII', esc(dec)]);
+    }
+    out.innerHTML = results.length
+      ? results.map(([t, b]) => `<span class="tk-good">// ${t}</span>\n${b}`).join('\n\n')
+      : '<span class="tk-warn">// could not identify encoding — not valid base64 / hex / URL-enc / binary / JWT / known hash length</span>';
+    beep(1200, .06, .05);
+  });
+
+  /* terminal hooks */
+  if (typeof CMDS === 'object') {
+    CMDS.toolkit = () => { termClose(); location.hash = '#toolkit'; };
+    ['ioc','phish','decode'].forEach(c => CMDS[c] = CMDS.toolkit);
+  }
 })();
 
 /* ════════ LIVING FAVICON — pulsing radar in the tab ════════ */
