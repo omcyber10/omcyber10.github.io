@@ -3141,5 +3141,97 @@ document.querySelectorAll('.project-card, .cert-card, .edu-card, .skill-category
   hero.addEventListener('mouseleave', () => { hc.style.transform = ''; });
 })();
 </script>
+
+<!-- ═══════ FLOW CURSOR — liquid comet trail ═══════ -->
+<style>
+/* retire the reticle */
+#reticle, #xhair-h, #xhair-v { display: none !important; }
+@media (pointer: fine) {
+  #flow-canvas { position: fixed; inset: 0; z-index: 99999; pointer-events: none; }
+}
+@media (pointer: coarse) { #flow-canvas { display: none; } }
+</style>
+<canvas id="flow-canvas"></canvas>
+<script>
+(function () {
+  const cv = document.getElementById('flow-canvas');
+  if (!cv || matchMedia('(pointer: coarse)').matches) return;
+  const cx = cv.getContext('2d');
+  let W, H;
+  function size() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+  size(); addEventListener('resize', size);
+
+  let mx = -100, my = -100;          // raw mouse
+  let hovering = false;
+
+  addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  /* keep flowing while scrolling: wheel nudges the stream downward/upward */
+  addEventListener('scroll', () => { /* positions are viewport-relative; trail naturally flows */ }, { passive: true });
+
+  const sel = 'a, button, input, textarea, .skill-tag, .cert-card, .project-card, .edu-card, .stat-card, .contact-link';
+  document.addEventListener('mouseover', e => { hovering = !!e.target.closest(sel); });
+
+  /* chain of segments — each eases toward the previous → liquid ribbon */
+  const N = 26;
+  const pts = Array.from({ length: N }, () => ({ x: -100, y: -100 }));
+
+  let hue = 195;                      // cyan → drifts slowly
+  let clickBurst = 0;
+  addEventListener('mousedown', () => { clickBurst = 1; });
+
+  (function draw() {
+    cx.clearRect(0, 0, W, H);
+
+    /* head eases to mouse, each segment eases to the one before */
+    pts[0].x += (mx - pts[0].x) * 0.38;
+    pts[0].y += (my - pts[0].y) * 0.38;
+    for (let i = 1; i < N; i++) {
+      pts[i].x += (pts[i - 1].x - pts[i].x) * 0.42;
+      pts[i].y += (pts[i - 1].y - pts[i].y) * 0.42;
+    }
+
+    hue += 0.18; if (hue > 215) hue = 175;   // subtle blue↔cyan drift
+    if (clickBurst > 0) clickBurst -= 0.05;
+
+    /* ribbon: draw segments thick→thin with glow */
+    for (let i = N - 1; i > 0; i--) {
+      const t = 1 - i / N;                      // 0 tail → 1 head
+      const w = (hovering ? 7 : 5) * t * t + 0.4;
+      cx.beginPath();
+      cx.moveTo(pts[i].x, pts[i].y);
+      cx.lineTo(pts[i - 1].x, pts[i - 1].y);
+      cx.strokeStyle = `hsla(${hue + i * 1.2}, 100%, ${58 + t * 18}%, ${t * 0.85})`;
+      cx.lineWidth = w;
+      cx.lineCap = 'round';
+      cx.shadowColor = `hsla(${hue}, 100%, 65%, ${t * 0.8})`;
+      cx.shadowBlur = 14 * t;
+      cx.stroke();
+    }
+    cx.shadowBlur = 0;
+
+    /* head: bright core + halo */
+    const r = hovering ? 6 : 3.5;
+    const grad = cx.createRadialGradient(pts[0].x, pts[0].y, 0, pts[0].x, pts[0].y, r * 5);
+    grad.addColorStop(0, `hsla(${hue},100%,85%,.95)`);
+    grad.addColorStop(.3, `hsla(${hue},100%,65%,.45)`);
+    grad.addColorStop(1, 'transparent');
+    cx.fillStyle = grad;
+    cx.beginPath(); cx.arc(pts[0].x, pts[0].y, r * 5, 0, Math.PI * 2); cx.fill();
+    cx.fillStyle = '#fff';
+    cx.beginPath(); cx.arc(pts[0].x, pts[0].y, r * .9, 0, Math.PI * 2); cx.fill();
+
+    /* click → expanding ring */
+    if (clickBurst > 0) {
+      cx.beginPath();
+      cx.arc(pts[0].x, pts[0].y, (1 - clickBurst) * 38, 0, Math.PI * 2);
+      cx.strokeStyle = `hsla(${hue},100%,70%,${clickBurst * .7})`;
+      cx.lineWidth = 1.6;
+      cx.stroke();
+    }
+
+    requestAnimationFrame(draw);
+  })();
+})();
+</script>
 </body>
 </html>
