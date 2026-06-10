@@ -2378,5 +2378,419 @@ function handleFormSubmit(e) {
   }, 3000);
 }
 </script>
+
+<!-- ═══════════════════════════════════════════════════════
+     ☢ INSANE LAYER — live SOC ticker, hacker terminal,
+       matrix rain, boot sequence, radar, sound FX
+═══════════════════════════════════════════════════════ -->
+<style>
+/* ── LIVE THREAT TICKER (bottom bar) ── */
+#soc-ticker {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 34px;
+  background: rgba(5,12,24,.94);
+  border-top: 1px solid rgba(0,212,255,.18);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  display: flex; align-items: center; gap: 0;
+  font-family: var(--font-mono); font-size: .7rem;
+  z-index: 95; overflow: hidden;
+}
+#soc-ticker .tick-label {
+  flex-shrink: 0; height: 100%;
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 14px;
+  background: rgba(0,255,136,.07);
+  border-right: 1px solid rgba(0,255,136,.2);
+  color: var(--green); letter-spacing: .12em;
+}
+#soc-ticker .tick-label .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); animation: pulse-green 1.6s infinite;
+}
+#tick-stream {
+  flex: 1; white-space: nowrap; overflow: hidden; position: relative; height: 100%;
+}
+#tick-inner {
+  position: absolute; display: inline-flex; gap: 48px; align-items: center;
+  height: 100%; will-change: transform;
+}
+.tick-item { color: var(--grey-400); }
+.tick-item b { font-weight: 500; }
+.tick-ok    b { color: var(--green); }
+.tick-warn  b { color: #ffd700; }
+.tick-alert b { color: #ff6b6b; }
+.tick-info  b { color: var(--cyan); }
+#tick-clock {
+  flex-shrink: 0; padding: 0 14px; height: 100%;
+  display: flex; align-items: center; gap: 12px;
+  border-left: 1px solid rgba(0,212,255,.15);
+  color: var(--cyan); letter-spacing: .08em;
+}
+#sfx-toggle {
+  background: none; border: none; color: var(--grey-400);
+  font-size: .8rem; cursor: pointer; padding: 2px 4px;
+  transition: color .2s;
+}
+#sfx-toggle.on { color: var(--green); }
+body { padding-bottom: 34px; }
+
+/* ── TERMINAL OVERLAY ── */
+#term-fab {
+  position: fixed; right: 22px; bottom: 56px; z-index: 96;
+  width: 52px; height: 52px; border-radius: 12px;
+  background: rgba(5,12,24,.92); color: var(--green);
+  border: 1px solid rgba(0,255,136,.35);
+  font-family: var(--font-mono); font-size: 1.15rem; font-weight: 700;
+  cursor: pointer; transition: all .25s;
+  box-shadow: 0 0 22px rgba(0,255,136,.12);
+  display: flex; align-items: center; justify-content: center;
+}
+#term-fab:hover { transform: translateY(-3px); box-shadow: 0 0 34px rgba(0,255,136,.3); background: rgba(0,255,136,.08); }
+#term-fab::after {
+  content: 'open terminal  [ ` ]';
+  position: absolute; right: 62px; white-space: nowrap;
+  font-size: .65rem; color: var(--grey-400); letter-spacing: .08em;
+  opacity: 0; transition: opacity .25s; pointer-events: none;
+  background: rgba(5,12,24,.95); border: 1px solid rgba(0,212,255,.15);
+  padding: 5px 10px; border-radius: 6px;
+}
+#term-fab:hover::after { opacity: 1; }
+
+#term-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(2,6,14,.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center; padding: 4vh 4vw;
+}
+#term-overlay.open { display: flex; animation: termIn .22s ease; }
+@keyframes termIn { from { opacity: 0; transform: scale(.985); } }
+#term-win {
+  width: min(860px, 100%); height: min(520px, 86vh);
+  background: #050b14; border: 1px solid rgba(0,255,136,.3);
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 0 70px rgba(0,255,136,.14), 0 30px 80px rgba(0,0,0,.6);
+  display: flex; flex-direction: column;
+  font-family: var(--font-mono); font-size: .82rem;
+}
+#term-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 14px; background: rgba(255,255,255,.03);
+  border-bottom: 1px solid rgba(255,255,255,.06); flex-shrink: 0;
+}
+#term-head .ttl { flex: 1; text-align: center; color: var(--grey-400); font-size: .7rem; letter-spacing: .1em; }
+#term-head .x { cursor: pointer; color: var(--grey-400); padding: 0 4px; }
+#term-head .x:hover { color: #ff6b6b; }
+#term-body {
+  flex: 1; overflow-y: auto; padding: 16px 18px; line-height: 1.75;
+  color: #b8ffd9;
+}
+#term-body .ln-p  { color: var(--green); }
+#term-body .ln-c  { color: #fff; }
+#term-body .ln-d  { color: var(--grey-400); }
+#term-body .ln-v  { color: var(--cyan); }
+#term-body .ln-w  { color: #ffd700; }
+#term-body .ln-a  { color: #ff6b6b; }
+#term-input-row { display: flex; gap: 8px; padding: 10px 18px 14px; flex-shrink: 0; align-items: center; }
+#term-input-row .p { color: var(--green); }
+#term-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: #fff; font-family: var(--font-mono); font-size: .82rem;
+}
+
+/* ── MATRIX RAIN ── */
+#matrix-canvas {
+  position: fixed; inset: 0; z-index: 300; display: none;
+  background: rgba(2,6,10,.92);
+}
+#matrix-canvas.on { display: block; }
+#matrix-hint {
+  position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
+  z-index: 301; display: none; font-family: var(--font-mono);
+  font-size: .72rem; color: rgba(0,255,136,.7); letter-spacing: .15em;
+}
+#matrix-canvas.on + #matrix-hint { display: block; }
+
+/* ── RADAR in hero corner ── */
+#radar-wrap {
+  position: absolute; right: 36px; top: 96px; z-index: 2;
+  width: 120px; height: 120px; opacity: .55; pointer-events: none;
+}
+@media (max-width: 900px) { #radar-wrap { display: none; } }
+</style>
+
+<!-- ticker -->
+<div id="soc-ticker">
+  <div class="tick-label"><span class="dot"></span> LIVE&nbsp;SOC&nbsp;FEED</div>
+  <div id="tick-stream"><div id="tick-inner"></div></div>
+  <div id="tick-clock">
+    <span id="utc-clock">--:--:-- UTC</span>
+    <button id="sfx-toggle" title="toggle sound fx"><i class="fa fa-volume-xmark"></i></button>
+  </div>
+</div>
+
+<!-- terminal -->
+<button id="term-fab" aria-label="Open terminal">&gt;_</button>
+<div id="term-overlay">
+  <div id="term-win">
+    <div id="term-head">
+      <span class="terminal-dot red"></span><span class="terminal-dot amber"></span><span class="terminal-dot green"></span>
+      <span class="ttl">om@soc — interactive shell — type "help"</span>
+      <span class="x" onclick="termClose()">✕</span>
+    </div>
+    <div id="term-body"></div>
+    <div id="term-input-row">
+      <span class="p">om@soc:~$</span>
+      <input id="term-input" autocomplete="off" spellcheck="false" />
+    </div>
+  </div>
+</div>
+
+<!-- matrix -->
+<canvas id="matrix-canvas"></canvas>
+<div id="matrix-hint">[ ESC or click to exit the matrix ]</div>
+
+<!-- radar -->
+<div id="radar-wrap">
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="60" r="58" fill="none" stroke="rgba(0,212,255,.25)" stroke-width="1"/>
+    <circle cx="60" cy="60" r="40" fill="none" stroke="rgba(0,212,255,.18)" stroke-width="1"/>
+    <circle cx="60" cy="60" r="22" fill="none" stroke="rgba(0,212,255,.14)" stroke-width="1"/>
+    <line x1="2" y1="60" x2="118" y2="60" stroke="rgba(0,212,255,.12)"/>
+    <line x1="60" y1="2" x2="60" y2="118" stroke="rgba(0,212,255,.12)"/>
+    <g style="transform-origin:60px 60px;animation:rotate 3.5s linear infinite;">
+      <path d="M60 60 L60 4 A56 56 0 0 1 95 16 Z" fill="rgba(0,255,136,.18)"/>
+      <line x1="60" y1="60" x2="60" y2="4" stroke="rgba(0,255,136,.8)" stroke-width="1.5"/>
+    </g>
+    <circle cx="82" cy="40" r="2.5" fill="#00ff88"><animate attributeName="opacity" values="0;1;0" dur="3.5s" repeatCount="indefinite"/></circle>
+    <circle cx="42" cy="78" r="2" fill="#ffd700"><animate attributeName="opacity" values="0;1;0" dur="3.5s" begin="1.6s" repeatCount="indefinite"/></circle>
+  </svg>
+</div>
+
+<script>
+/* ════════ BOOT SEQUENCE in loader ════════ */
+(function () {
+  const lines = [
+    'BIOS v2.6 — OM-SEC SYSTEMS',
+    'mounting /dev/skills ............ OK',
+    'loading SIEM correlation rules .. OK',
+    'starting EDR sensors ............ OK',
+    'syncing MITRE ATT&CK matrix ..... OK',
+    'threat intel feeds .............. LIVE',
+    'access level: RECRUITER ......... GRANTED'
+  ];
+  const el = document.querySelector('.loader-logo');
+  if (!el) return;
+  let i = 0;
+  const t = setInterval(() => {
+    el.textContent = lines[i] || '';
+    if (++i >= lines.length) clearInterval(t);
+  }, 240);
+})();
+
+/* ════════ SOUND FX (off by default) ════════ */
+let sfxOn = false, audioCtx = null;
+function beep(freq = 880, dur = 0.04, gain = 0.04, type = 'square') {
+  if (!sfxOn) return;
+  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(gain, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + dur);
+}
+document.getElementById('sfx-toggle').addEventListener('click', function () {
+  sfxOn = !sfxOn;
+  this.classList.toggle('on', sfxOn);
+  this.innerHTML = sfxOn ? '<i class="fa fa-volume-high"></i>' : '<i class="fa fa-volume-xmark"></i>';
+  beep(1200, .07, .06);
+});
+document.querySelectorAll('a, button, .skill-tag').forEach(el => {
+  el.addEventListener('mouseenter', () => beep(900, .025, .02));
+});
+document.addEventListener('click', () => beep(620, .04, .03), true);
+
+/* ════════ LIVE THREAT TICKER ════════ */
+(function () {
+  const events = [
+    ['ok',    'firewall', 'inbound scan from 185.220.x.x dropped'],
+    ['info',  'siem', 'correlation rule matched — severity: low'],
+    ['warn',  'edr', 'unsigned binary executed in sandbox — quarantined'],
+    ['ok',    'auth', '0 failed logins in last 5 min'],
+    ['alert', 'honeypot', 'SSH brute-force attempt logged & reported'],
+    ['info',  'intel', 'new IOC feed synced — 1,204 indicators'],
+    ['ok',    'patch', 'all systems at latest security baseline'],
+    ['warn',  'dns', 'newly-registered domain query flagged'],
+    ['info',  'recruiter', 'om.patel status: AVAILABLE FOR HIRE'],
+    ['ok',    'mttr', 'incident containment avg: < 4h'],
+    ['alert', 'phishing', 'credential-harvest URL blocked at proxy'],
+    ['info',  'hunt', 'hypothesis-driven sweep complete — clean'],
+  ];
+  const inner = document.getElementById('tick-inner');
+  function build() {
+    inner.innerHTML = '';
+    const pool = [...events].sort(() => Math.random() - .5);
+    pool.concat(pool).forEach(([cls, src, msg]) => {
+      const s = document.createElement('span');
+      s.className = 'tick-item tick-' + cls;
+      s.innerHTML = `<b>[${src.toUpperCase()}]</b> ${msg}`;
+      inner.appendChild(s);
+    });
+  }
+  build();
+  let x = 0;
+  (function scroll() {
+    x -= 0.6;
+    if (-x > inner.scrollWidth / 2) { x = 0; build(); }
+    inner.style.transform = `translateX(${x}px)`;
+    requestAnimationFrame(scroll);
+  })();
+  setInterval(() => {
+    document.getElementById('utc-clock').textContent =
+      new Date().toISOString().slice(11, 19) + ' UTC';
+  }, 1000);
+})();
+
+/* ════════ INTERACTIVE TERMINAL ════════ */
+const termOverlay = document.getElementById('term-overlay');
+const termBody    = document.getElementById('term-body');
+const termInput   = document.getElementById('term-input');
+
+function termOpen()  { termOverlay.classList.add('open'); termInput.focus(); beep(1000,.06,.05); }
+function termClose() { termOverlay.classList.remove('open'); beep(500,.06,.04); }
+document.getElementById('term-fab').addEventListener('click', termOpen);
+document.addEventListener('keydown', e => {
+  if (e.key === '`' && !termOverlay.classList.contains('open') &&
+      !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); termOpen(); }
+  if (e.key === 'Escape') { termClose(); matrixStop(); }
+});
+termOverlay.addEventListener('click', e => { if (e.target === termOverlay) termClose(); });
+
+function tPrint(html, cls = 'ln-d') {
+  const d = document.createElement('div');
+  d.className = cls; d.innerHTML = html;
+  termBody.appendChild(d);
+  termBody.scrollTop = termBody.scrollHeight;
+}
+tPrint('<span class="ln-v">om-sec interactive shell v3.1</span> — type <span class="ln-w">help</span> for commands');
+
+const CMDS = {
+  help: () => {
+    tPrint('available commands:', 'ln-v');
+    [['whoami','who is om patel'],['skills','dump skill tree'],['certs','list certifications'],
+     ['projects','show lab work'],['contact','reach out'],['nmap','scan this site'],
+     ['matrix','enter the matrix'],['sudo hire_om','do the right thing'],
+     ['resume','download resume'],['clear','clear screen'],['exit','close terminal']]
+    .forEach(([c, d]) => tPrint(`&nbsp;&nbsp;<span class="ln-w">${c.padEnd(14,' ')}</span> ${d}`));
+  },
+  whoami: () => {
+    tPrint('Om Patel — Cybersecurity Analyst', 'ln-v');
+    tPrint('M.Eng. Information Systems Security, Concordia University');
+    tPrint('SOC ops · incident response · detection engineering · vuln mgmt');
+    tPrint('location: Canada 🍁 &nbsp;|&nbsp; status: <span class="ln-w">ACTIVELY HUNTING (for a job)</span>');
+  },
+  skills: () => {
+    tPrint('[####################] SIEM / Splunk / ELK', 'ln-v');
+    tPrint('[###################_] Incident Response');
+    tPrint('[##################__] EDR / LimaCharlie / MITRE ATT&CK');
+    tPrint('[##################__] Vulnerability Mgmt / Qualys VMDR');
+    tPrint('[#################___] Threat Hunting & Intel');
+    tPrint('[################____] Python / PowerShell / Bash');
+  },
+  certs: () => {
+    tPrint('✔ Cisco CyberOps Associate (2024)', 'ln-v');
+    tPrint('✔ Fortinet FCSS Security Operations (2024)', 'ln-v');
+    tPrint('✔ Qualys VMDR Specialist (2025)', 'ln-v');
+    tPrint('✔ Google Cybersecurity Professional (2025)', 'ln-v');
+    tPrint('✔ Proofpoint Security Awareness Specialist (2025)', 'ln-v');
+  },
+  projects: () => {
+    tPrint('1. EDR Lab — LimaCharlie: LSASS dump simulation (T1003.001), 4 detections authored', 'ln-v');
+    tPrint('2. AWS IAM Key Lifecycle: automated credential governance, zero manual ops', 'ln-v');
+    tPrint('→ github.com/omcyber10');
+  },
+  contact: () => {
+    tPrint('email&nbsp;&nbsp;&nbsp;: ompatelclg@gmail.com', 'ln-v');
+    tPrint('linkedin: linkedin.com/in/omcyber', 'ln-v');
+    tPrint('github&nbsp;&nbsp;: github.com/omcyber10', 'ln-v');
+  },
+  nmap: () => {
+    tPrint('Starting Nmap 7.95 ( https://nmap.org )', 'ln-d');
+    setTimeout(() => tPrint('PORT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STATE&nbsp;SERVICE', 'ln-v'), 350);
+    setTimeout(() => tPrint('443/tcp&nbsp;&nbsp;open&nbsp;&nbsp;dedication'), 600);
+    setTimeout(() => tPrint('8080/tcp&nbsp;open&nbsp;&nbsp;work-ethic'), 800);
+    setTimeout(() => tPrint('1337/tcp&nbsp;open&nbsp;&nbsp;detection-skills'), 1000);
+    setTimeout(() => tPrint('22/tcp&nbsp;&nbsp;&nbsp;<span class="ln-a">closed</span>&nbsp;excuses'), 1200);
+    setTimeout(() => tPrint('Scan complete: candidate is <span class="ln-w">EXPLOITABLE BY EMPLOYERS</span>', 'ln-v'), 1500);
+  },
+  matrix: () => { termClose(); matrixStart(); },
+  resume: () => { tPrint('initiating download…', 'ln-v'); window.open('https://omcyber10.github.io/Om_Patel_Resume.pdf', '_blank'); },
+  clear: () => { termBody.innerHTML = ''; },
+  exit: termClose,
+  'sudo hire_om': () => {
+    tPrint('[sudo] password for recruiter: ********', 'ln-d');
+    setTimeout(() => tPrint('verifying credentials… OK', 'ln-v'), 500);
+    setTimeout(() => tPrint('escalating privileges… OK', 'ln-v'), 950);
+    setTimeout(() => tPrint('★ EXCELLENT DECISION. Opening contact channel…', 'ln-w'), 1450);
+    setTimeout(() => { termClose(); location.hash = '#contact'; }, 2300);
+  },
+};
+termInput.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const raw = termInput.value.trim(); termInput.value = '';
+  if (!raw) return;
+  tPrint(`<span class="ln-p">om@soc:~$</span> <span class="ln-c">${raw.replace(/</g,'&lt;')}</span>`);
+  beep(1100, .03, .04);
+  const cmd = raw.toLowerCase();
+  if (CMDS[cmd]) CMDS[cmd]();
+  else if (cmd.startsWith('sudo')) tPrint('permission granted — you seem important. try: <span class="ln-w">sudo hire_om</span>', 'ln-w');
+  else if (cmd === 'rm -rf /') tPrint('nice try. this portfolio has immutable backups. 😏', 'ln-a');
+  else tPrint(`command not found: ${cmd} — type <span class="ln-w">help</span>`, 'ln-a');
+});
+
+/* ════════ MATRIX RAIN + KONAMI ════════ */
+const mCanvas = document.getElementById('matrix-canvas');
+const mCtx = mCanvas.getContext('2d');
+let mRun = null, drops = [];
+function matrixStart() {
+  mCanvas.width = innerWidth; mCanvas.height = innerHeight;
+  mCanvas.classList.add('on');
+  const cols = Math.floor(innerWidth / 16);
+  drops = Array(cols).fill(1);
+  const chars = 'アイウエオカキクケコ01OMPATEL{}<>/$#@';
+  mRun = setInterval(() => {
+    mCtx.fillStyle = 'rgba(2,6,10,0.08)';
+    mCtx.fillRect(0, 0, mCanvas.width, mCanvas.height);
+    mCtx.font = '15px monospace';
+    drops.forEach((y, i) => {
+      mCtx.fillStyle = Math.random() > .975 ? '#aaffcc' : '#00ff88';
+      mCtx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 16, y * 16);
+      drops[i] = (y * 16 > mCanvas.height && Math.random() > .975) ? 0 : y + 1;
+    });
+  }, 45);
+  beep(300, .25, .05, 'sawtooth');
+}
+function matrixStop() {
+  if (!mRun) return;
+  clearInterval(mRun); mRun = null;
+  mCanvas.classList.remove('on');
+}
+mCanvas.addEventListener('click', matrixStop);
+
+const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let kPos = 0;
+document.addEventListener('keydown', e => {
+  kPos = (e.key === konami[kPos]) ? kPos + 1 : 0;
+  if (kPos === konami.length) { kPos = 0; matrixStart(); }
+});
+
+/* ════════ TAB-AWAY TITLE ════════ */
+const realTitle = document.title;
+document.addEventListener('visibilitychange', () => {
+  document.title = document.hidden ? '⚠ ALERT: recruiter left the perimeter' : realTitle;
+});
+
+/* ════════ CONSOLE EASTER EGG ════════ */
+console.log('%c┌─────────────────────────────────────────┐\n│  You opened DevTools. I like you already. │\n│  om@soc:~$ sudo hire_om                    │\n│  → ompatelclg@gmail.com                    │\n└─────────────────────────────────────────┘',
+  'color:#00ff88;font-family:monospace;font-size:12px;');
+</script>
 </body>
 </html>
