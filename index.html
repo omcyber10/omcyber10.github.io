@@ -3233,5 +3233,303 @@ document.querySelectorAll('.project-card, .cert-card, .edu-card, .skill-category
   })();
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════
+     ⚡ BEYOND GOD MODE — 3D attack globe, sentry mode,
+       visitor threat assessment, gyro parallax
+═══════════════════════════════════════════════════════ -->
+<style>
+/* retire the little radar — the globe replaces it */
+#radar-wrap { display: none !important; }
+
+/* ── 3D ATTACK GLOBE ── */
+#globe-wrap {
+  position: absolute; right: 3vw; top: 50%; transform: translateY(-50%);
+  z-index: 1; pointer-events: none; opacity: .85;
+}
+#globe-wrap .globe-tag {
+  font-family: var(--font-mono); font-size: .58rem; letter-spacing: .25em;
+  color: rgba(0,212,255,.6); text-align: center; margin-top: 6px;
+}
+#globe-wrap .globe-tag b { color: #ff6b6b; font-weight: 500; animation: blink 1.2s step-end infinite; }
+@media (max-width: 1100px) { #globe-wrap { display: none; } }
+
+/* ── SENTRY MODE ── */
+#sentry {
+  position: fixed; inset: 0; z-index: 9000; display: none;
+  background: rgba(2,4,9,.96);
+  align-items: center; justify-content: center; flex-direction: column; gap: 28px;
+  font-family: var(--font-mono); cursor: none;
+}
+#sentry.on { display: flex; animation: sentryIn 1.2s ease; }
+@keyframes sentryIn { from { opacity: 0; } }
+#sentry-eye {
+  width: 130px; height: 130px; border-radius: 50%;
+  border: 2px solid rgba(255,80,80,.55); position: relative;
+  box-shadow: 0 0 60px rgba(255,60,60,.25), inset 0 0 40px rgba(255,60,60,.12);
+  animation: eyePulse 3s ease-in-out infinite;
+}
+#sentry-eye::before {
+  content: ''; position: absolute; inset: 26px; border-radius: 50%;
+  border: 1px solid rgba(255,80,80,.4);
+}
+#sentry-eye::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: radial-gradient(circle, #ff4444 0%, #aa0000 70%);
+  transform: translate(-50%,-50%);
+  box-shadow: 0 0 30px rgba(255,60,60,.9);
+  animation: eyeScan 4.5s ease-in-out infinite;
+}
+@keyframes eyePulse { 50% { box-shadow: 0 0 90px rgba(255,60,60,.45), inset 0 0 50px rgba(255,60,60,.2); } }
+@keyframes eyeScan {
+  0%,100% { transform: translate(-50%,-50%); }
+  25% { transform: translate(-90%,-50%); }
+  75% { transform: translate(-10%,-50%); }
+}
+#sentry h2 { color: #ff5555; font-size: 1rem; letter-spacing: .4em; font-weight: 600; }
+#sentry .s-log { color: #5a3a3a; font-size: .68rem; letter-spacing: .12em; line-height: 2.2; text-align: center; }
+#sentry .s-log .lv { color: #cc6666; }
+
+/* ── THREAT ASSESSMENT TOAST ── */
+#threat-toast {
+  position: fixed; right: -420px; bottom: 110px; z-index: 8000;
+  width: 340px; background: rgba(5,12,24,.96);
+  border: 1px solid rgba(0,255,136,.3); border-radius: 12px;
+  font-family: var(--font-mono); overflow: hidden;
+  box-shadow: 0 0 50px rgba(0,255,136,.12), 0 20px 60px rgba(0,0,0,.5);
+  transition: right .6s cubic-bezier(.2,1.4,.3,1);
+}
+#threat-toast.show { right: 22px; }
+#threat-toast .tt-head {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+  background: rgba(0,255,136,.06); border-bottom: 1px solid rgba(0,255,136,.15);
+  font-size: .62rem; letter-spacing: .2em; color: var(--green);
+}
+#threat-toast .tt-head .x { margin-left: auto; cursor: pointer; color: var(--grey-400); }
+#threat-toast .tt-head .x:hover { color: #ff6b6b; }
+#threat-toast .tt-body { padding: 14px; font-size: .68rem; line-height: 2; color: var(--grey-400); }
+#threat-toast .tt-body b { color: var(--cyan); font-weight: 500; }
+#threat-toast .tt-verdict {
+  margin-top: 8px; padding: 8px; text-align: center; border-radius: 6px;
+  background: rgba(0,255,136,.08); border: 1px solid rgba(0,255,136,.25);
+  color: var(--green); letter-spacing: .15em; font-size: .66rem;
+}
+#tt-scanbar { height: 2px; background: rgba(0,255,136,.15); }
+#tt-scanbar i { display: block; height: 100%; width: 0%; background: var(--green); transition: width 2.8s linear; box-shadow: 0 0 8px var(--green); }
+@media (max-width: 600px) { #threat-toast { width: calc(100vw - 30px); } }
+</style>
+
+<!-- globe -->
+<div id="globe-wrap">
+  <canvas id="globe" width="320" height="320"></canvas>
+  <div class="globe-tag">GLOBAL THREAT MAP · <b>● LIVE</b> · ATTACKS BLOCKED</div>
+</div>
+
+<!-- sentry -->
+<div id="sentry">
+  <div id="sentry-eye"></div>
+  <h2>SENTRY MODE</h2>
+  <div class="s-log">
+    no operator input detected — perimeter watch engaged<br>
+    <span class="lv" id="sentry-timer">monitoring… 00:00</span><br>
+    move to re-authenticate
+  </div>
+</div>
+
+<!-- threat toast -->
+<div id="threat-toast">
+  <div class="tt-head"><i class="fa fa-shield-halved"></i> VISITOR THREAT ASSESSMENT <span class="x" onclick="document.getElementById('threat-toast').classList.remove('show')">✕</span></div>
+  <div id="tt-scanbar"><i id="tt-fill"></i></div>
+  <div class="tt-body" id="tt-body"></div>
+</div>
+
+<script>
+/* ════════ 3D WIREFRAME ATTACK GLOBE — pure math, no libs ════════ */
+(function () {
+  const cv = document.getElementById('globe');
+  if (!cv) return;
+  const cx = cv.getContext('2d');
+  const R = 118, CX = 160, CY = 160;
+  let rot = 0;
+
+  /* lat/lon → 3D → 2D with rotation around Y axis */
+  function p3(lat, lon, r) {
+    const la = lat * Math.PI / 180, lo = lon * Math.PI / 180 + rot;
+    return {
+      x: r * Math.cos(la) * Math.sin(lo),
+      y: -r * Math.sin(la),
+      z: r * Math.cos(la) * Math.cos(lo)
+    };
+  }
+  const proj = p => ({ x: CX + p.x, y: CY + p.y, vis: p.z > -8 });
+
+  const CITIES = [
+    [45.5,-73.6,'MONTREAL'],[43.7,-79.4,'TORONTO'],[49.3,-123.1,'VANCOUVER'],
+    [51.5,-0.1,'LONDON'],[35.7,139.7,'TOKYO'],[1.35,103.8,'SINGAPORE'],
+    [-33.9,151.2,'SYDNEY'],[19.1,72.9,'MUMBAI'],[40.7,-74,'NYC'],
+    [52.5,13.4,'BERLIN'],[55.7,37.6,'MOSCOW'],[-23.5,-46.6,'SÃO PAULO']
+  ];
+
+  let arcs = [];
+  function spawnArc() {
+    const a = CITIES[Math.floor(Math.random() * CITIES.length)];
+    let b = CITIES[Math.floor(Math.random() * CITIES.length)];
+    while (b === a) b = CITIES[Math.floor(Math.random() * CITIES.length)];
+    arcs.push({ a, b, t: 0, speed: .008 + Math.random() * .01 });
+    if (arcs.length > 7) arcs.shift();
+  }
+  setInterval(spawnArc, 900); spawnArc(); spawnArc(); spawnArc();
+
+  /* great-arc interpolation lifted off the sphere surface */
+  function arcPoint(a, b, t) {
+    const lat = a[0] + (b[0] - a[0]) * t;
+    const lon = a[1] + (b[1] - a[1]) * t;
+    const lift = Math.sin(t * Math.PI) * 34;
+    return p3(lat, lon, R + lift);
+  }
+
+  function draw() {
+    cx.clearRect(0, 0, 320, 320);
+    rot += 0.0042;
+
+    /* sphere halo */
+    const halo = cx.createRadialGradient(CX, CY, R * .8, CX, CY, R * 1.25);
+    halo.addColorStop(0, 'rgba(42,111,188,0)');
+    halo.addColorStop(.85, 'rgba(0,212,255,.08)');
+    halo.addColorStop(1, 'rgba(0,212,255,0)');
+    cx.fillStyle = halo;
+    cx.beginPath(); cx.arc(CX, CY, R * 1.25, 0, Math.PI * 2); cx.fill();
+
+    /* meridians */
+    for (let lon = 0; lon < 360; lon += 30) {
+      cx.beginPath();
+      for (let lat = -90; lat <= 90; lat += 6) {
+        const p = p3(lat, lon, R), q = proj(p);
+        if (p.z < 0) { cx.moveTo(q.x, q.y); continue; }
+        lat === -90 ? cx.moveTo(q.x, q.y) : cx.lineTo(q.x, q.y);
+      }
+      cx.strokeStyle = 'rgba(42,111,188,.28)'; cx.lineWidth = .6; cx.stroke();
+    }
+    /* parallels */
+    for (let lat = -60; lat <= 60; lat += 30) {
+      cx.beginPath();
+      let started = false;
+      for (let lon = 0; lon <= 360; lon += 6) {
+        const p = p3(lat, lon, R), q = proj(p);
+        if (p.z < 0) { started = false; continue; }
+        started ? cx.lineTo(q.x, q.y) : cx.moveTo(q.x, q.y); started = true;
+      }
+      cx.strokeStyle = 'rgba(42,111,188,.28)'; cx.lineWidth = .6; cx.stroke();
+    }
+
+    /* cities */
+    CITIES.forEach(c => {
+      const p = p3(c[0], c[1], R);
+      if (p.z < 0) return;
+      const q = proj(p);
+      cx.fillStyle = 'rgba(0,212,255,.9)';
+      cx.beginPath(); cx.arc(q.x, q.y, 1.7, 0, Math.PI * 2); cx.fill();
+    });
+
+    /* attack arcs */
+    arcs.forEach(arc => {
+      arc.t = Math.min(arc.t + arc.speed, 1);
+      /* trail */
+      cx.beginPath();
+      let moved = false;
+      for (let t = Math.max(0, arc.t - .35); t <= arc.t; t += .02) {
+        const p = arcPoint(arc.a, arc.b, t);
+        if (p.z < -10) { moved = false; continue; }
+        const q = proj(p);
+        moved ? cx.lineTo(q.x, q.y) : cx.moveTo(q.x, q.y); moved = true;
+      }
+      cx.strokeStyle = 'rgba(255,80,80,.75)'; cx.lineWidth = 1.3;
+      cx.shadowColor = 'rgba(255,60,60,.8)'; cx.shadowBlur = 6;
+      cx.stroke(); cx.shadowBlur = 0;
+      /* impact flash */
+      if (arc.t >= 1) {
+        const p = arcPoint(arc.a, arc.b, 1);
+        if (p.z > 0) {
+          const q = proj(p);
+          cx.beginPath(); cx.arc(q.x, q.y, 5 * Math.random() + 2, 0, Math.PI * 2);
+          cx.strokeStyle = 'rgba(0,255,136,.8)'; cx.lineWidth = 1; cx.stroke();
+        }
+      }
+    });
+    arcs = arcs.filter(a => a.t < 1 || Math.random() > .12);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ════════ SENTRY MODE — idle watchdog ════════ */
+(function () {
+  const sentry = document.getElementById('sentry');
+  const timerEl = document.getElementById('sentry-timer');
+  let idleT, sentryAt = 0, tick;
+  function arm() {
+    clearTimeout(idleT);
+    if (sentry.classList.contains('on')) {
+      sentry.classList.remove('on');
+      clearInterval(tick);
+      beep(900, .08, .05); beep(1300, .08, .05);
+    }
+    idleT = setTimeout(() => {
+      sentry.classList.add('on');
+      sentryAt = Date.now();
+      beep(220, .3, .05, 'sawtooth');
+      tick = setInterval(() => {
+        const s = Math.floor((Date.now() - sentryAt) / 1000);
+        timerEl.textContent = `monitoring… ${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+      }, 1000);
+    }, 45000);
+  }
+  ['mousemove','keydown','scroll','touchstart','click'].forEach(ev =>
+    addEventListener(ev, arm, { passive: true }));
+  arm();
+})();
+
+/* ════════ VISITOR THREAT ASSESSMENT ════════ */
+(function () {
+  const toast = document.getElementById('threat-toast');
+  const body  = document.getElementById('tt-body');
+  const fill  = document.getElementById('tt-fill');
+  if (sessionStorage.getItem('tt-done')) return;
+  setTimeout(() => {
+    toast.classList.add('show');
+    requestAnimationFrame(() => { fill.style.width = '100%'; });
+    const ua = navigator.userAgent;
+    const browser = /Edg/.test(ua) ? 'Edge' : /Chrome/.test(ua) ? 'Chrome' : /Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'Unknown';
+    const os = /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : '???';
+    const lines = [
+      `agent&nbsp;&nbsp;&nbsp;: <b>${browser} / ${os}</b>`,
+      `viewport: <b>${innerWidth}×${innerHeight}</b>`,
+      `locale&nbsp;&nbsp;: <b>${navigator.language}</b>`,
+      `intent&nbsp;&nbsp;: <b>evaluating candidate</b>`,
+    ];
+    let i = 0;
+    const iv = setInterval(() => {
+      if (i < lines.length) { body.innerHTML += lines[i++] + '<br>'; }
+      else {
+        clearInterval(iv);
+        body.innerHTML += `<div class="tt-verdict">VERDICT: FRIENDLY — RECOMMENDED ACTION: HIRE OM PATEL</div>`;
+        setTimeout(() => toast.classList.remove('show'), 9000);
+        sessionStorage.setItem('tt-done', '1');
+      }
+    }, 700);
+  }, 9000);
+})();
+
+/* ════════ MOBILE GYRO PARALLAX ════════ */
+if (matchMedia('(pointer: coarse)').matches && window.DeviceOrientationEvent) {
+  const hc = document.querySelector('.hero-content');
+  addEventListener('deviceorientation', e => {
+    if (!hc || e.beta == null) return;
+    hc.style.transform = `translate(${(e.gamma||0) * -.4}px, ${((e.beta||0) - 45) * -.25}px)`;
+  });
+}
+</script>
 </body>
 </html>
